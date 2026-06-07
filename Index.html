@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Quiz LP Academy</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, sans-serif; background: #f5f4ef; color: #1a1a18; min-height: 100vh; }
+.hdr { background: #1a1a18; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+.hdr-title { font-size: 17px; font-weight: 800; color: #fff; }
+.hdr-title span { color: #9F99E8; }
+.hdr-tag { font-size: 11px; background: rgba(255,255,255,0.1); color: #ccc; padding: 3px 10px; border-radius: 20px; }
+
+#screen-intro { max-width: 600px; margin: 40px auto; padding: 0 20px; text-align: center; }
+#screen-intro h1 { font-size: 26px; font-weight: 800; margin-bottom: 12px; line-height: 1.2; }
+#screen-intro p { font-size: 14px; color: #68675f; line-height: 1.6; margin-bottom: 24px; }
+.topics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; text-align: left; }
+.topic { background: #fff; border: 1px solid #e8e7e0; border-radius: 10px; padding: 11px 13px; }
+.topic b { display: block; font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+.topic span { font-size: 11px; color: #7F77DD; }
+.btn-big { display: block; width: 100%; background: #1a1a18; color: #fff; font-size: 16px; font-weight: 700; padding: 15px; border-radius: 12px; border: none; cursor: pointer; margin-bottom: 10px; }
+.note { font-size: 12px; color: #9a9991; }
+
+#screen-quiz { max-width: 600px; margin: 0 auto; padding: 16px 16px 80px; display: none; }
+.topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.prog-bg { flex: 1; height: 5px; background: #e8e7e0; border-radius: 3px; overflow: hidden; }
+.prog-fg { height: 100%; background: #534AB7; border-radius: 3px; transition: width 0.3s; }
+.pills { display: flex; gap: 6px; }
+.pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px; }
+.p-num { background: #fff; border: 1px solid #e8e7e0; color: #68675f; }
+.p-ok { background: #EAF3DE; color: #1E5204; }
+.p-ko { background: #FCEBEB; color: #8B1F1F; }
+.p-tm { background: #FEF0DC; color: #6B3A00; min-width: 46px; text-align: center; }
+
+.card { background: #fff; border-radius: 16px; border: 1px solid #e8e7e0; padding: 20px; margin-bottom: 12px; }
+.q-cat { display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #534AB7; background: #EEEDFE; padding: 3px 9px; border-radius: 20px; margin-bottom: 10px; }
+.q-num { font-size: 12px; color: #9a9991; margin-left: 8px; }
+.q-txt { font-size: 15px; font-weight: 600; line-height: 1.6; margin-bottom: 16px; }
+.opts { display: flex; flex-direction: column; gap: 8px; }
+.opt { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1.5px solid #e8e7e0; border-radius: 10px; background: #fff; font-size: 14px; line-height: 1.5; color: #1a1a18; text-align: left; width: 100%; cursor: pointer; -webkit-appearance: none; }
+.opt-l { width: 24px; height: 24px; min-width: 24px; border-radius: 50%; background: #f5f4ef; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #68675f; }
+.opt.ok { background: #EAF3DE; border-color: #3B7A15; color: #1E5204; }
+.opt.ok .opt-l { background: #3B7A15; color: #fff; }
+.opt.ko { background: #FCEBEB; border-color: #C0392B; color: #8B1F1F; }
+.opt.ko .opt-l { background: #C0392B; color: #fff; }
+.opt.sc { background: #EAF3DE; border-color: #3B7A15; color: #1E5204; }
+.opt.sc .opt-l { background: #3B7A15; color: #fff; }
+
+.fb { margin-top: 12px; border-radius: 10px; overflow: hidden; border: 1px solid #e8e7e0; }
+.fb-exp { padding: 12px 14px; background: #f7f6ff; border-left: 3px solid #7F77DD; font-size: 13px; color: #454542; line-height: 1.65; }
+.fb-src { padding: 8px 14px; background: #fafaf7; border-top: 1px solid #e8e7e0; font-size: 11px; color: #9a9991; }
+.fb-src a { color: #534AB7; font-weight: 600; text-decoration: none; }
+
+.nxt-wrap { display: flex; justify-content: flex-end; margin-top: 8px; }
+.nxt { background: #1a1a18; color: #fff; font-size: 14px; font-weight: 700; padding: 11px 24px; border-radius: 10px; border: none; cursor: pointer; display: none; }
+
+#screen-res { max-width: 600px; margin: 0 auto; padding: 40px 20px 80px; display: none; text-align: center; }
+.res-score { font-size: 60px; font-weight: 800; color: #534AB7; line-height: 1; margin-bottom: 6px; }
+.res-pct { font-size: 18px; color: #9a9991; margin-bottom: 14px; }
+.res-verdict { display: inline-block; font-size: 13px; font-weight: 700; padding: 6px 16px; border-radius: 20px; margin-bottom: 20px; }
+.vg { background: #EAF3DE; color: #1E5204; }
+.va { background: #FEF0DC; color: #6B3A00; }
+.vr { background: #FCEBEB; color: #8B1F1F; }
+.sg { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+.sc2 { background: #fff; border: 1px solid #e8e7e0; border-radius: 12px; padding: 12px 8px; }
+.sc2 .v { font-size: 22px; font-weight: 800; }
+.sc2 .l { font-size: 11px; color: #9a9991; margin-top: 2px; }
+.v-ok { color: #1E5204; } .v-ko { color: #8B1F1F; } .v-t { color: #534AB7; }
+.cats-box { background: #fff; border: 1px solid #e8e7e0; border-radius: 12px; padding: 14px; margin-bottom: 16px; text-align: left; }
+.cats-box h3 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #9a9991; margin-bottom: 10px; }
+.cr { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.cn { flex: 1; font-size: 11px; color: #454542; }
+.cb { width: 70px; height: 4px; background: #e8e7e0; border-radius: 2px; overflow: hidden; flex-shrink: 0; }
+.cf { height: 100%; background: #7F77DD; border-radius: 2px; }
+.cs { font-size: 11px; font-weight: 700; width: 30px; text-align: right; color: #68675f; flex-shrink: 0; }
+.res-btns { display: flex; gap: 10px; justify-content: center; }
+.rb { padding: 11px 24px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid #e8e7e0; }
+.rb.p { background: #1a1a18; color: #fff; border-color: #1a1a18; }
+.rb.s { background: #fff; color: #1a1a18; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-title">LP <span>Academy</span></div>
+  <div class="hdr-tag">70 questions</div>
+</div>
+
+<!-- INTRO -->
+<div id="screen-intro">
+  <h1>Certification<br>Création de Société</h1>
+  <p>70 questions tirées des pages Notion LP Academy. Chaque réponse affiche l'explication et le lien source Notion.</p>
+  <div class="topics">
+    <div class="topic"><b>RBE</b><span>15 questions</span></div>
+    <div class="topic"><b>Bail commercial</b><span>13 questions</span></div>
+    <div class="topic"><b>Activités</b><span>14 questions</span></div>
+    <div class="topic"><b>Réglementées</b><span>10 questions</span></div>
+    <div class="topic"><b>Création</b><span>10 questions</span></div>
+    <div class="topic"><b>Licences</b><span>8 questions</span></div>
+  </div>
+  <button class="btn-big" onclick="startQuiz()">Commencer l'entraînement</button>
+  <p class="note">Durée estimée : 1h20 – 1h30</p>
+</div>
+
+<!-- QUIZ -->
+<div id="screen-quiz">
+  <div class="topbar">
+    <div class="prog-bg"><div class="prog-fg" id="prog"></div></div>
+    <div class="pills">
+      <span class="pill p-num" id="pq">1/70</span>
+      <span class="pill p-ok" id="pok">0</span>
+      <span class="pill p-ko" id="pko">0</span>
+    </div>
+    <span class="pill p-tm" id="timer">0:00</span>
+  </div>
+  <div id="qa"></div>
+  <div class="nxt-wrap"><button class="nxt" id="nxt" onclick="nextQ()">Suivant</button></div>
+</div>
+
+<!-- RÉSULTATS -->
+<div id="screen-res">
+  <div class="res-score" id="rs"></div>
+  <div class="res-pct" id="rp"></div>
+  <div class="res-verdict" id="rv"></div>
+  <div class="sg">
+    <div class="sc2"><div class="v v-ok" id="rok"></div><div class="l">Correctes</div></div>
+    <div class="sc2"><div class="v v-ko" id="rko"></div><div class="l">Incorrectes</div></div>
+    <div class="sc2"><div class="v v-t" id="rt"></div><div class="l">Temps</div></div>
+  </div>
+  <div class="cats-box" id="cats"></div>
+  <div class="res-btns">
+    <button class="rb p" onclick="startQuiz()">Recommencer</button>
+    <button class="rb s" onclick="window.print()">Imprimer</button>
+  </div>
+</div>
+
+<script>
+var S = {
+  rbe_notion:  {t:"Notion juridique : RBE", u:"https://app.notion.com/p/365a5f4d310f8037a2b4e7686d70254b"},
+  rbe_zoom:    {t:"Zoom sur les RBE",       u:"https://app.notion.com/p/27c8e015921b40299531da17809cbcb0"},
+  rbe_process: {t:"Process LP - RBE",       u:"https://app.notion.com/p/366a5f4d310f80fab278ddb94b4633f5"},
+  bail:        {t:"Bail commercial & sous-location", u:"https://app.notion.com/p/5a621d95b0a3467caf3e04c3a0465463"},
+  bail_notion: {t:"Bail commercial",        u:"https://app.notion.com/p/36ca5f4d310f80afb97fd076ebfa523a"},
+  activites:   {t:"Zoom sur les activites", u:"https://app.notion.com/p/62bc6c57612d4079a35f319e08ca7a7c"},
+  act_process: {t:"Process LP - activites", u:"https://app.notion.com/p/36ca5f4d310f80a1bc5dd0f0a958559d"},
+  creation:    {t:"Creation sans activite", u:"https://app.notion.com/p/366a5f4d310f80868505ef6226c35346"},
+  notions:     {t:"Notions juridiques",     u:"https://app.notion.com/p/8d57bc521aef440388ca8c0c2d669d80"},
+  formes:      {t:"Zoom formes sociales",   u:"https://app.notion.com/p/367a5f4d310f8020b734cf9f8cc328fc"}
+};
+
+var ALL = [
+{cat:"RBE",q:"Depuis quelle loi et quelle date le RBE est-il obligatoire ?",opts:["Loi Pacte 2019","Loi Sapin 2 — 2 aout 2017","Loi ALUR 2014","Decret 2023"],ans:1,exp:"Le RBE est obligatoire depuis le 2 aout 2017 (loi Sapin 2). Les societes existantes devaient regulariser avant le 1er avril 2018.",src:"rbe_notion"},
+{cat:"RBE",q:"Quel article du Code monetaire et financier definit le beneficiaire effectif ?",opts:["Article L.561-2-2","Article L.123-1","Article L.210-6","Article L.411-2"],ans:0,exp:"L'article L.561-2-2 du Code monetaire et financier definit le beneficiaire effectif : toute personne physique exercant le controle effectif d'une societe.",src:"rbe_notion"},
+{cat:"RBE",q:"Quel est le seuil de detention du capital pour etre beneficiaire effectif ?",opts:["Plus de 10%","Plus de 20%","Plus de 25%","Plus de 50%"],ans:2,exp:"Est BE toute personne physique possedant directement ou indirectement PLUS DE 25% du capital ou des droits de vote.",src:"rbe_notion"},
+{cat:"RBE",q:"Si aucune personne ne depasse 25%, qui est declare BE par defaut ?",opts:["Tous les associes","Le representant legal de la societe","Les 2 plus gros actionnaires","Personne — RBE vide"],ans:1,exp:"Cas particulier : si aucune personne physique ne peut etre identifiee, le BE est le representant legal (ou les representants legaux) de la societe.",src:"rbe_notion"},
+{cat:"RBE",q:"A quels 2 moments doit-on effectuer la declaration RBE ?",opts:["A la creation et a la dissolution","A l'immatriculation et a toute modification","A chaque exercice comptable","A la creation et tous les 5 ans"],ans:1,exp:"La declaration doit etre faite a deux moments : a l'IMMATRICULATION et a toute MODIFICATION des informations declarees.",src:"rbe_notion"},
+{cat:"RBE",q:"Quelle est l'amende max pour une personne MORALE n'ayant pas fait sa declaration RBE ?",opts:["7 500 EUR","15 000 EUR","37 500 EUR","75 000 EUR"],ans:2,exp:"Les sanctions sont : jusqu'a 7 500 EUR pour les personnes physiques et jusqu'a 37 500 EUR pour les personnes morales.",src:"rbe_notion"},
+{cat:"RBE",q:"Quelle est l'amende max pour une personne PHYSIQUE n'ayant pas fait sa declaration RBE ?",opts:["1 500 EUR","3 750 EUR","7 500 EUR","15 000 EUR"],ans:2,exp:"L'amende pour une personne physique peut aller jusqu'a 7 500 EUR. Pour les personnes morales : 37 500 EUR.",src:"rbe_notion"},
+{cat:"RBE",q:"Dans une SASU avec un associe unique a 100%, qui est le BE ?",opts:["Personne","L'associe unique","Le president uniquement","Les deux"],ans:1,exp:"L'associe unique detient 100% du capital (bien plus que 25%) : il est donc le beneficiaire effectif.",src:"rbe_zoom"},
+{cat:"RBE",q:"Une SARL a 4 associes a 25% chacun. Combien y a-t-il de BE ?",opts:["0 — personne ne depasse 25%","1 — le gerant par defaut","2","4"],ans:1,exp:"Le seuil est STRICTEMENT superieur a 25%. Avec 25% exactement, aucun ne depasse le seuil. C'est donc le representant legal qui est declare BE par defaut.",src:"rbe_zoom"},
+{cat:"RBE",q:"SARL : A=40%, B=35%, C=25%. Qui sont les BE ?",opts:["A et B uniquement","A, B et C","A uniquement","Le gerant par defaut"],ans:0,exp:"Seuls A (40%) et B (35%) depassent le seuil de PLUS de 25%. C avec exactement 25% n'est pas BE. Donc A et B sont les beneficiaires effectifs.",src:"rbe_zoom"},
+{cat:"RBE",q:"Dans la checklist questionnaire RBE, que faut-il TOUJOURS verifier ?",opts:["Que le capital est libere","Que les adresses des dirigeants sont conformes au Kbis","Que tous les associes ont plus de 18 ans","Que les statuts sont signes par un notaire"],ans:1,exp:"Selon le process LP-RBE, il faut TOUJOURS verifier que l'adresse des dirigeants est conforme au Kbis.",src:"rbe_process"},
+{cat:"RBE",q:"Pour une SARL, EURL ou SCI, que faut-il verifier en plus dans le questionnaire RBE ?",opts:["Que le capital est superieur a 1000 EUR","Que la liste des BE correspond aux statuts","Que le bail commercial est signe","Que l'activite n'est pas reglementee"],ans:1,exp:"Pour une SARL, EURL ou SCI : la liste des BE doit correspondre a ce qui est indique dans les statuts. Verification conditionnee a ces formes sociales.",src:"rbe_process"},
+{cat:"RBE",q:"Quand un associe est une societe ETRANGERE, que faut-il faire ?",opts:["Ne declarer que le gerant francais","Toujours recuperer tous les BE de la societe etrangere","Ignorer si elle detient moins de 50%","Demander uniquement les statuts"],ans:1,exp:"Pour une societe etrangere associee, il faut TOUJOURS recuperer tous les BE de cette societe. Pour une PM francaise, on verifie le retool RBE.",src:"rbe_process"},
+{cat:"RBE",q:"Un associe a 20% peut-il etre beneficiaire effectif ?",opts:["Non, jamais en dessous de 25%","Oui, s'il exerce un controle sur les organes de direction","Oui, uniquement s'il est aussi gerant","Non, sauf si moins de 3 associes"],ans:1,exp:"Oui — meme en dessous de 25%, une personne peut etre BE si elle exerce un controle sur les organes de direction ou de gestion (2e critere de l'article L.561-2-2).",src:"rbe_notion"},
+{cat:"RBE",q:"La declaration RBE concerne quels types de societes ?",opts:["Uniquement SARL et SAS","Uniquement les societes cotees","Les societes commerciales ET civiles","Uniquement les societes avec plus de 10 associes"],ans:2,exp:"L'obligation de declaration RBE concerne les societes commerciales ET civiles (SAS, SARL, SCI, SA, SASU, EURL, etc.).",src:"rbe_notion"},
+{cat:"Bail commercial",q:"Quelles sont les 4 conditions cumulatives du statut de bail commercial ?",opts:["Duree 9 ans + loyer + caution + assurance","Contrat de bail + local commercial/artisanal/industriel + fonds de commerce + locataire immatricule au RCS","Signature notariee + activite commerciale + duree min + caution","Surface >50m2 + activite principale + bail ecrit + depot de garantie"],ans:1,exp:"Les 4 conditions cumulatives : 1) Contrat de bail 2) Local a usage commercial, artisanal ou industriel 3) Exploitation d'un fonds de commerce 4) Immatriculation du locataire au RCS.",src:"bail"},
+{cat:"Bail commercial",q:"Quels sont les 3 avantages du bail commercial pour le locataire ?",opts:["Loyer plafonne + duree illimitee + pas de caution","Droit au renouvellement (9 ans) + indemnite d'eviction + revision du loyer tous les 3 ans","Bail gratuit + pas de charges + resiliation libre","Resiliation a tout moment + loyer fixe + duree 3 ans"],ans:1,exp:"3 avantages : droit au renouvellement au bout de 9 ans, indemnite d'eviction en cas de non-renouvellement, revision du loyer tous les 3 ans.",src:"bail"},
+{cat:"Bail commercial",q:"Les professions liberales peuvent-elles signer un bail commercial ?",opts:["Oui, sans restriction","Oui si local transforme en bureau","Non — elles doivent signer un bail professionnel","Oui pour les activites de conseil"],ans:2,exp:"Les professions liberales NE PEUVENT PAS signer de bail commercial. Leur activite n'etant pas commerciale, elles doivent signer un bail professionnel.",src:"bail"},
+{cat:"Bail commercial",q:"Un bail signe en nom propre (avant immatriculation) est-il accepte ?",opts:["Non, jamais","Oui si societe deja immatriculee","Oui, a condition qu'il contienne une CLAUSE DE SUBSTITUTION","Oui si le dirigeant est actionnaire majoritaire"],ans:2,exp:"Un bail en nom propre est accepte UNIQUEMENT s'il contient une clause de substitution au profit d'une personne morale. La mention 'representant legal en cours de formation' ne suffit pas.",src:"bail"},
+{cat:"Bail commercial",q:"La sous-location d'un bail commercial est-elle autorisee par defaut ?",opts:["Oui, librement","Non — interdite sauf autorisation du proprietaire","Oui, pour une partie du local","Non, sauf accord mairie"],ans:1,exp:"La sous-location du bail commercial est en principe INTERDITE. Elle peut etre autorisee par le proprietaire (bailleur).",src:"bail"},
+{cat:"Bail commercial",q:"Quelles sont les 2 conditions cumulatives pour que la sous-location soit possible ?",opts:["Accord bailleur + sous-locataire immatricule au RCS","Autorisation du bailleur + bailleur a connaissance des conditions de la sous-location","Loyer sous-location = loyer principal + accord ecrit","Meme activite + bail principal en cours"],ans:1,exp:"Deux conditions cumulatives : 1) Le bailleur a donne son AUTORISATION 2) Le bailleur a CONNAISSANCE DES CONDITIONS de la sous-location. Sans cela, le bailleur peut resilier le bail.",src:"bail"},
+{cat:"Bail commercial",q:"Comment informer le bailleur d'une intention de sous-louer ?",opts:["Par email","Par acte d'huissier ou lettre recommandee avec AR","Par courrier ordinaire","Aucune formalite si deja autorise"],ans:1,exp:"Le locataire doit informer le bailleur par acte d'huissier ou lettre recommandee avec AR, meme si la sous-location est deja autorisee dans le bail.",src:"bail"},
+{cat:"Bail commercial",q:"Quel est le delai de reponse du bailleur apres information sur la sous-location ?",opts:["8 jours — refus implicite","15 jours — accord implicite en cas de silence","30 jours — refus implicite","60 jours"],ans:1,exp:"Le bailleur a 15 jours pour repondre. En cas de SILENCE, son ACCORD est considere comme donne (accord tacite).",src:"bail"},
+{cat:"Bail commercial",q:"Dans quel delai le bailleur peut-il reclamer une revision du loyer apres une sous-location ?",opts:["6 mois","1 an","2 ans a compter de la connaissance du prix","5 ans"],ans:2,exp:"Le bailleur dispose de 2 ANS pour reclamer une revision du loyer, a compter du jour ou il a connaissance du prix de la sous-location.",src:"bail"},
+{cat:"Bail commercial",q:"Quels sont les 3 documents pour accepter un contrat de sous-location ?",opts:["Bail initial + assurance + RIB","Bail commercial initial + avenant (si applicable) + autorisation du bailleur","Kbis + bail + statuts","Bail + PV d'AG + extrait RCS"],ans:1,exp:"3 documents necessaires : 1) Le contrat de bail commercial initial 2) L'avenant (le cas echeant) 3) L'autorisation du bailleur.",src:"bail"},
+{cat:"Bail commercial",q:"Qu'est-ce qu'une convention de mise a disposition ?",opts:["Un bail simplifie entre particuliers","Un contrat entre deux societes quand l'une met a disposition une partie de ses locaux","Un accord verbal pour partager un bureau","Un contrat de location-gerance"],ans:1,exp:"Convention de mise a disposition = contrat entre deux societes, utilise quand une societe n'occupe pas ses locaux en totalite et en met une partie a disposition d'une autre societe.",src:"bail"},
+{cat:"Bail commercial",q:"Quels justificatifs accompagnent une convention de mise a disposition ?",opts:["Uniquement la convention signee","Convention + Kbis de la societe qui met a disposition + justificatif qu'elle est proprietaire ou locataire","Convention + statuts + extrait RCS","Convention + assurance + acte notarie"],ans:1,exp:"Il faut : la convention + le Kbis de la societe qui met a disposition + un justificatif qu'elle est propriétaire ou locataire (JDD type facture EDF, ou bail commercial).",src:"bail"},
+{cat:"Bail commercial",q:"La checklist LP d'un bail commercial contient obligatoirement quoi ?",opts:["Duree + loyer + caution","Bailleur + Preneur + Contrat bail commercial (pas promesse) + Lieux (adresse + surface) + Duree + Activite autorisee + Signatures 2 parties","Nom societe + gerant + activite","SIREN + adresse + loyer + duree"],ans:1,exp:"La checklist LP verifie : BAILLEUR, PRENEUR, CONTRAT (bail co, pas promesse), LIEUX (adresse + surface), DUREE, DATE EFFET, ACTIVITE autorisee, VALIDITE (signatures 2 parties).",src:"bail"},
+{cat:"Activites & objet social",q:"Difference entre activite sociale et objet social ?",opts:["Ce sont des synonymes","Activite sociale = declaree au greffe (exercee) ; objet social = ensemble des activites possibles dans les statuts","Objet social = declare au greffe ; activite sociale = dans les statuts","Activite sociale = uniquement artisanale"],ans:1,exp:"L'activite sociale est l'activite declaree au greffe (reellement exercee). L'objet social est l'ensemble des activites possibles mentionnes dans les statuts.",src:"activites"},
+{cat:"Activites & objet social",q:"Qu'est-ce qui determine le code NAF/APE de l'INSEE ?",opts:["La forme juridique","L'activite principale (qui doit generer le plus de CA)","Le nombre d'associes","Le capital social"],ans:1,exp:"C'est l'ACTIVITE PRINCIPALE qui determine le code NAF. Elle correspond a l'activite qui doit generer le plus de chiffre d'affaires.",src:"activites"},
+{cat:"Activites & objet social",q:"Lequel de ces mots est INTERDIT dans un objet social ?",opts:["Vente","Fabrication","Etc.","Prestation"],ans:2,exp:"Les termes 'etc.', 'certaines', 'environ', 'tous travaux', 'divers' sont INTERDITS dans un objet social car ils creent une ambiguite.",src:"act_process"},
+{cat:"Activites & objet social",q:"La ponctuation (';' et '.') est-elle autorisee dans un objet social ?",opts:["Oui, pour separer les activites","Oui, uniquement le point final","Non — ces signes sont interdits","Oui, uniquement le point-virgule"],ans:2,exp:"Un objet social NE PEUT PAS contenir de ponctuation telle que ';' et '.'. Regle de forme redactionnelle a verifier systematiquement.",src:"act_process"},
+{cat:"Activites & objet social",q:"Comment un plombier formule-t-il correctement son objet social ?",opts:["Je suis plombier","Plombier","Travaux de plomberie generale","Code APE 4322A"],ans:2,exp:"Un objet social definit une ACTIVITE, pas un metier. Pas de phrases conjuguees ni de codes APE. Ex correct : 'Travaux de plomberie generale'.",src:"activites"},
+{cat:"Activites & objet social",q:"Pour l'achat-revente, quelle precision est obligatoire dans l'objet social ?",opts:["Le prix de vente","Neuf ou d'occasion","Le fournisseur principal","Le canal de distribution"],ans:1,exp:"Pour toute activite d'achat-revente, l'objet social doit obligatoirement preciser NEUF OU D'OCCASION.",src:"activites"},
+{cat:"Activites & objet social",q:"Un objet social peut-il contenir un nom de marque ?",opts:["Oui si c'est la marque principale","Non — aucun nom de marque","Oui avec l'accord de la marque","Oui pour la distribution agreee"],ans:1,exp:"Un objet social NE PEUT PAS contenir de nom de marque. Ex refuse : 'Vente d'objets de la marque Coca-Cola'. L'objet social decrit une activite generique.",src:"act_process"},
+{cat:"Activites & objet social",q:"Quelle est la nature de l'activite d'un plombier ?",opts:["Commerciale","Artisanale","Liberale","Agricole"],ans:1,exp:"Le plombier est ARTISANAL : il fabrique, transforme ou repare des produits via intervention manuelle et qualification. Immatricule au Repertoire des Metiers (CMA).",src:"activites"},
+{cat:"Activites & objet social",q:"Un coach sportif en micro-entreprise : quelle est la nature de son activite ?",opts:["Commerciale","Artisanale","Liberale","Agricole"],ans:2,exp:"Le coach sportif en ME est LIBERAL. Attention : la meme activite peut etre commerciale en societe. La distinction ME vs societe est cruciale.",src:"activites"},
+{cat:"Activites & objet social",q:"La cession de fonds de commerce — 2 conditions obligatoires ?",opts:["Location d'un local 9 ans","Vente elements corporels + incorporels d'une activite ayant une clientele, de nature commerciale ou artisanale","Transfert du siege social","Dissolution volontaire"],ans:1,exp:"Cession de fonds = vente des elements corporels (materiel) et incorporels (clientele, enseigne). 2 conditions : l'activite doit avoir une CLIENTELE et etre COMMERCIALE OU ARTISANALE.",src:"activites"},
+{cat:"Activites & objet social",q:"La location-gerance : a quoi la reconnait-on dans un dossier LP ?",opts:["Un bail professionnel pour liberaux","Droit d'exploiter un fonds par un tiers — indice : licence IV pas au nom de la societe","Contrat de gerance salariee","Bail avec redevance fixe"],ans:1,exp:"Location-gerance = proprietaire accorde a un locataire-gerant le droit d'exploiter son fonds. INDICES LP : licence IV non au nom de la societe, justificatif delivre par une mairie, activite de taxi.",src:"activites"},
+{cat:"Activites & objet social",q:"Activite necessitant un local + siege au domicile : quelle procedure ?",opts:["Rien de special","Creer un 2e etablissement au local, rattacher l'activite et fournir le bail","Declarer sans bail puis regulariser","Refuser le dossier"],ans:1,exp:"Procedure : 1) Declarer la creation d'un 2e etablissement 2) Rattacher l'activite a ce nouvel etablissement 3) Fournir OBLIGATOIREMENT le bail.",src:"act_process"},
+{cat:"Activites & objet social",q:"Client indique 'Prestation de service' ou 'Vente de tout objet'. Que faire ?",opts:["Accepter, c'est courant","Accepter si SAS uniquement","Refuser et demander une description precise — trop vague","Valider si confirmation email"],ans:2,exp:"REFUSER. Ces formulations sont trop vagues. L'objet social doit permettre de comprendre precisement l'activite exercee.",src:"act_process"},
+{cat:"Activites & objet social",q:"Bail dans un departement different du siege social : quelle procedure ?",opts:["Declarer le 2e etablissement lors de l'immatriculation","Immatriculer sans activite, puis mise en activite dans le departement du bail","Refuser le dossier","Immatriculer avec activite sans bail"],ans:1,exp:"Procedure : immatriculer sans activite, puis proceder a la mise en activite dans le departement du local en ouvrant un etablissement principal.",src:"act_process"},
+{cat:"Activites reglementees",q:"Quelle loi impose une qualification professionnelle pour certaines activites artisanales ?",opts:["Loi du 5 juillet 1996","Loi PACTE 2019","Loi ALUR 2014","Loi Sapin 2 2017"],ans:0,exp:"La loi du 5 juillet 1996 exige une qualification professionnelle pour les activites pouvant, si mal exercees, mettre en jeu la securite et la sante du consommateur.",src:"activites"},
+{cat:"Activites reglementees",q:"Difference entre condition d'ACCES et condition d'EXERCICE ?",opts:["Identiques","Acces = justificatif AVANT de demarrer ; Exercice = controle possible PENDANT l'activite","Acces = artisans ; Exercice = liberaux","Exercice = plus contraignante"],ans:1,exp:"ACCES : justificatif requis AVANT de demarrer. EXERCICE : pas de justificatif requis au depart, peut etre controle durant l'activite.",src:"activites"},
+{cat:"Activites reglementees",q:"Pour les activites artisanales reglementees, les 3 options de qualification ?",opts:["Diplome OU 5 ans OU achat d'un fonds","Diplome OU plus de 3 ans d'experience OU embauche d'un salarie qualifie","Diplome OU QUALIOPI OU caution","Diplome OU 3 ans OU attestation CMA"],ans:1,exp:"3 options : 1) Diplome lie a l'activite (ex: CAP) 2) Attestation de plus de 3 ans d'experience 3) Embauche d'un salarie avec diplome ou experience.",src:"activites"},
+{cat:"Activites reglementees",q:"Quel justificatif pour le transport de marchandises ?",opts:["Attestation ORIAS","Carte VTC","Attestation DREAL","Agrement prefectoral"],ans:2,exp:"Pour le transport de marchandises : attestation DREAL (Direction Regionale de l'Environnement, de l'Amenagement et du Logement). Condition d'ACCES.",src:"act_process"},
+{cat:"Activites reglementees",q:"Pour exercer comme taxi : 2 justificatifs obligatoires ?",opts:["Carte VTC + DREAL","Carte de taxi + autorisation de stationner","Licence IV + carte taxi","Agrement prefectoral + carte pro"],ans:1,exp:"Pour le taxi : carte de taxi + autorisation de stationner. Deux conditions cumulatives d'acces.",src:"act_process"},
+{cat:"Activites reglementees",q:"L'agent immobilier : condition d'acces ou d'exercice ?",opts:["Condition d'acces — carte avant de demarrer","Condition d'exercice — carte CCI apres immatriculation","Aucune reglementation","Acces uniquement pour SA"],ans:1,exp:"Agent immobilier = condition d'EXERCICE : la carte professionnelle est a demander a la CCI apres l'immatriculation.",src:"activites"},
+{cat:"Activites reglementees",q:"Le brocanteur : quel justificatif et quand ?",opts:["Agrement prefectoral avant creation","Carte de commercant non sedentaire apres immatriculation (condition d'exercice)","Attestation DREAL","Licence avant creation"],ans:1,exp:"Brocanteur = condition d'EXERCICE : carte de commercant non sedentaire a demander apres l'immatriculation.",src:"activites"},
+{cat:"Activites reglementees",q:"Quel mot est interdit dans toute description d'activite de convoyage ?",opts:["Marchandises","Transport","Livraison","Logistique"],ans:1,exp:"Le mot TRANSPORT est interdit dans toute description de convoyage, pour eviter la confusion avec le transport de marchandises (DREAL obligatoire).",src:"act_process"},
+{cat:"Activites reglementees",q:"L'attestation ORIAS : pour quelle activite et quel cas LP ?",opts:["Transport — DREAL","Vente d'alcool — licence IV","Intermediation assurance/banque (courtier) — immatriculation sans activite","Restauration — aucun cas particulier"],ans:2,exp:"ORIAS = intermediation en assurance ou operations de banque (courtiers, agents generaux). C'est l'un des 4 cas d'immatriculation sans activite chez LP.",src:"creation"},
+{cat:"Activites reglementees",q:"Combien d'activites reglementees le document LP Academy recense-t-il ?",opts:["30","45","60","100"],ans:2,exp:"Le document LP Academy liste 60 activites reglementees a consulter systematiquement.",src:"activites"},
+{cat:"Creation & immatriculation",q:"Les 4 cas d'usage de l'immatriculation sans activite chez LP ?",opts:["Attente associe, comptable, financement, levee de fonds","Licence de boisson + bail commercial + agrement ORIAS + attestation DREAL","Visa + carte de sejour + permis construire + accord bancaire","Statuts + RIB + tampon fiscal + attestation comptable"],ans:1,exp:"4 cas LP : 1) Attente licence de debit de boisson 2) Attente bail commercial 3) Attente agrement ORIAS 4) Attente attestation DREAL.",src:"creation"},
+{cat:"Creation & immatriculation",q:"Lors d'une immatriculation sans activite, qu'est-ce que la societe ne possede PAS ?",opts:["Un SIRET","Un Kbis","Un etablissement principal","Une denomination sociale"],ans:2,exp:"La societe sans activite ne comporte PAS d'etablissement principal et ne peut exercer aucune activite. Elle a bien un SIRET et un Kbis.",src:"creation"},
+{cat:"Creation & immatriculation",q:"Delai max pour la mise en activite apres immatriculation sans activite ?",opts:["1 mois","2 mois","3 mois","6 mois"],ans:1,exp:"L'entrepreneur dispose de 2 MOIS apres l'immatriculation sans activite pour mettre en activite sa societe.",src:"creation"},
+{cat:"Creation & immatriculation",q:"Dans quel delai les apports en numeraire doivent-ils etre deposes ?",opts:["24 heures","8 jours","15 jours","30 jours"],ans:1,exp:"Les apports en numeraire doivent etre deposes dans les 8 JOURS de leur reception sur un compte bloque (banque, notaire ou Caisse des depots).",src:"notions"},
+{cat:"Creation & immatriculation",q:"Duree maximale d'une societe dans ses statuts ?",opts:["50 ans","75 ans","99 ans","Illimitee"],ans:2,exp:"La duree d'une societe ne peut exceder 99 ANS. Elle peut etre prolongee par decision des associes avant l'echeance.",src:"notions"},
+{cat:"Creation & immatriculation",q:"Lequel ne concourt PAS a la formation du capital social ?",opts:["Apport en numeraire","Apport en nature en pleine propriete","Apport en industrie","Apport en nature en jouissance"],ans:2,exp:"L'apport en industrie (mise a disposition de connaissances) ne concourt PAS au capital social. Seuls les apports en numeraire et en nature y entrent.",src:"notions"},
+{cat:"Creation & immatriculation",q:"LP prend-il en charge les revisions completes des statuts ?",opts:["Oui, tous types","Non — uniquement modifications ciblees, pas les revisions completes","Oui, uniquement pour SAS","Oui, avec un notaire"],ans:1,exp:"LP ne prend en charge que les modifications statutaires CIBLEES. Les revisions completes des statuts ne sont pas prises en charge.",src:"notions"},
+{cat:"Creation & immatriculation",q:"Quel document la societe recoit lors de son immatriculation au RCS ?",opts:["Numero TVA","Extrait Kbis","Attestation URSSAF","Certificat INPI"],ans:1,exp:"L'extrait KBIS est le document officiel delivre par le greffe lors de l'immatriculation. C'est la carte d'identite de la societe.",src:"notions"},
+{cat:"Creation & immatriculation",q:"Si la societe n'est pas constituee dans les 6 mois apres depot des apports ?",opts:["Les fonds restent bloques","L'apporteur peut demander en justice la restitution de son apport","Saisir le greffe","Reclamer des interets"],ans:1,exp:"Si non constituee dans les 6 mois, tout apporteur peut demander en JUSTICE la restitution de son apport en numeraire.",src:"notions"},
+{cat:"Creation & immatriculation",q:"Particularite de la SEP (Societe en Participation) ?",opts:["Pas de capital minimum","Seule societe non immatriculee au RCS — sans personnalite morale","Reservee aux associations","Un seul associe possible"],ans:1,exp:"La SEP est la SEULE societe non immatriculee au RCS. Elle n'a donc pas de personnalite morale et ne peut pas detenir de patrimoine propre.",src:"formes"},
+{cat:"Licences boissons",q:"Quel justificatif LP exige pour un bar ou une discoteque ?",opts:["Agrement prefectoral","Permis d'exploitation uniquement","Licence IV au nom du dirigeant","Attestation ORIAS"],ans:2,exp:"Pour les activites de vente d'alcool a des non-professionnels (bar, discotheque), LP exige une LICENCE IV au nom du DIRIGEANT. Condition d'acces a la creation.",src:"activites"},
+{cat:"Licences boissons",q:"La licence IV doit etre au nom de qui ?",opts:["La societe","Le dirigeant","Au choix","Indifferemment"],ans:1,exp:"La licence IV doit etre au nom du DIRIGEANT. Si elle est au nom d'un tiers, c'est un indice de location-gerance.",src:"activites"},
+{cat:"Licences boissons",q:"La petite licence restaurant autorise quelles boissons ?",opts:["Uniquement les softs","Vins, bieres, cidres jusqu'a 18 degres (groupes 1 et 2)","Tous les alcools","Uniquement les spiritueux"],ans:1,exp:"La petite licence restaurant autorise les groupes 1 et 2 : sans alcool, vins, bieres, cidres — jusqu'a 18 degres. Pas de spiritueux.",src:"activites"},
+{cat:"Licences boissons",q:"La licence IV est necessaire pour quelle activite ?",opts:["Bieres pression uniquement","Vente et consommation sur place de TOUS les alcools y compris spiritueux","Vente a emporter de vin","Grande surface"],ans:1,exp:"Licence IV = vente et consommation sur place de TOUTES les boissons alcoolisees, y compris les spiritueux (groupe 4 et 5). Obligatoire pour bar ou discotheque.",src:"activites"},
+{cat:"Licences boissons",q:"Client veut creer un bar sans licence IV encore. Procedure LP ?",opts:["Refuser definitivement","Immatriculation sans activite — 2 mois pour obtenir la licence","Immatriculer avec activite et laisser regulariser","Demander attestation provisoire"],ans:1,exp:"Licence IV en attente = IMMATRICULATION SANS ACTIVITE. L'entrepreneur a 2 MOIS pour obtenir la licence et proceder a la mise en activite.",src:"creation"},
+{cat:"Licences boissons",q:"Difference entre licence de restaurant et licence de debit de boissons ?",opts:["Aucune","Licence restaurant = boissons avec repas uniquement ; licence debit = vente a tout moment","Licence restaurant = fast-foods","Licence debit = grandes surfaces"],ans:1,exp:"Licence RESTAURANT : boissons alcoolisees uniquement en accompagnement d'un repas. Licence DEBIT DE BOISSONS : vente a tout moment, sans obligation de restauration.",src:"activites"},
+{cat:"Licences boissons",q:"Licence IV au nom d'un tiers (ni societe ni dirigeant) : c'est l'indice de quoi ?",opts:["Erreur administrative","Situation de location-gerance","Depot de marque","Immatriculation sans activite"],ans:1,exp:"Licence IV non au nom de la societe ni du dirigeant = INDICE DE LOCATION-GERANCE. Il faut analyser le dossier et demander le contrat de location-gerance.",src:"activites"},
+{cat:"Licences boissons",q:"Restaurant servant vin et biere avec les repas uniquement : quelle licence suffit ?",opts:["Licence I (softs)","Petite licence restaurant (groupes 1 et 2)","Licence IV obligatoire","Aucune licence"],ans:1,exp:"Pour vins et bieres uniquement (groupes 1 et 2), la PETITE LICENCE RESTAURANT suffit. La licence IV n'est necessaire que si des spiritueux sont servis.",src:"activites"}
+];
+
+var qs = [], cur = 0, ok = 0, ko = 0, t0 = null, ti = null, catS = {};
+
+function shuffle(a) {
+  var b = a.slice();
+  for (var i = b.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = b[i]; b[i] = b[j]; b[j] = tmp;
+  }
+  return b;
+}
+
+function startQuiz() {
+  qs = shuffle(ALL);
+  catS = {};
+  for (var i = 0; i < qs.length; i++) {
+    var cat = qs[i].cat;
+    if (!catS[cat]) catS[cat] = {t: 0, c: 0};
+    catS[cat].t++;
+  }
+  cur = 0; ok = 0; ko = 0;
+  document.getElementById('screen-intro').style.display = 'none';
+  document.getElementById('screen-res').style.display = 'none';
+  document.getElementById('screen-quiz').style.display = 'block';
+  if (ti) clearInterval(ti);
+  t0 = Date.now();
+  ti = setInterval(function() {
+    var s = Math.floor((Date.now() - t0) / 1000);
+    var m = Math.floor(s / 60);
+    var sec = s % 60;
+    document.getElementById('timer').textContent = m + ':' + (sec < 10 ? '0' : '') + sec;
+  }, 1000);
+  renderQ();
+}
+
+function renderQ() {
+  if (cur >= qs.length) { showResults(); return; }
+  var q = qs[cur];
+  var pct = Math.floor((cur / qs.length) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('pq').textContent = (cur + 1) + '/' + qs.length;
+  document.getElementById('pok').textContent = '✓ ' + ok;
+  document.getElementById('pko').textContent = '✗ ' + ko;
+
+  var L = ['A', 'B', 'C', 'D'];
+  var optsHTML = '';
+  for (var i = 0; i < q.opts.length; i++) {
+    optsHTML += '<button class="opt" id="opt' + i + '" onclick="pick(' + i + ')">' +
+      '<span class="opt-l">' + L[i] + '</span>' + q.opts[i] + '</button>';
+  }
+
+  var html = '<div class="card">' +
+    '<div><span class="q-cat">' + q.cat + '</span><span class="q-num">Q' + (cur + 1) + '</span></div>' +
+    '<div class="q-txt">' + q.q + '</div>' +
+    '<div class="opts">' + optsHTML + '</div>' +
+    '</div>';
+
+  document.getElementById('qa').innerHTML = html;
+  document.getElementById('nxt').style.display = 'none';
+}
+
+function pick(idx) {
+  var q = qs[cur];
+  var opts = document.querySelectorAll('.opt');
+  for (var i = 0; i < opts.length; i++) opts[i].disabled = true;
+
+  if (idx === q.ans) {
+    opts[idx].className = 'opt ok';
+    ok++;
+    catS[q.cat].c++;
+  } else {
+    opts[idx].className = 'opt ko';
+    opts[q.ans].className = 'opt sc';
+    ko++;
+  }
+
+  document.getElementById('pok').textContent = '✓ ' + ok;
+  document.getElementById('pko').textContent = '✗ ' + ko;
+
+  var src = S[q.src];
+  var card = document.querySelector('.card');
+  var fb = document.createElement('div');
+  fb.className = 'fb';
+  fb.innerHTML = '<div class="fb-exp"><strong>Explication :</strong> ' + q.exp + '</div>' +
+    '<div class="fb-src">Source : <a href="' + src.u + '" target="_blank">' + src.t + '</a></div>';
+  card.appendChild(fb);
+
+  document.getElementById('nxt').style.display = 'block';
+}
+
+function nextQ() {
+  cur++;
+  renderQ();
+}
+
+function showResults() {
+  clearInterval(ti);
+  document.getElementById('screen-quiz').style.display = 'none';
+  var el = Math.floor((Date.now() - t0) / 1000);
+  var pct = Math.round((ok / qs.length) * 100);
+
+  document.getElementById('rs').textContent = ok + '/' + qs.length;
+  document.getElementById('rp').textContent = pct + '% de bonnes reponses';
+
+  var vt, vc;
+  if (pct >= 80) { vt = 'Excellent ! Tu es pret(e).'; vc = 'vg'; }
+  else if (pct >= 60) { vt = 'Bien — points a retravailler.'; vc = 'va'; }
+  else { vt = 'Continue a reviser !'; vc = 'vr'; }
+
+  document.getElementById('rv').textContent = vt;
+  document.getElementById('rv').className = 'res-verdict ' + vc;
+  document.getElementById('rok').textContent = ok;
+  document.getElementById('rko').textContent = ko;
+  document.getElementById('rt').textContent = Math.floor(el / 60) + 'min ' + (el % 60) + 's';
+
+  var ch = '<h3>Score par theme</h3>';
+  var keys = Object.keys(catS);
+  for (var i = 0; i < keys.length; i++) {
+    var c = keys[i];
+    var s = catS[c];
+    var p = s.t ? Math.round((s.c / s.t) * 100) : 0;
+    ch += '<div class="cr"><span class="cn">' + c + '</span>' +
+      '<div class="cb"><div class="cf" style="width:' + p + '%"></div></div>' +
+      '<span class="cs">' + s.c + '/' + s.t + '</span></div>';
+  }
+  document.getElementById('cats').innerHTML = ch;
+  document.getElementById('screen-res').style.display = 'block';
+}
+</script>
+</body>
+</html>
